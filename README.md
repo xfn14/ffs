@@ -1,0 +1,3 @@
+# FastFileSync
+
+Dropbox wanna be.
