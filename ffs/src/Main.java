@@ -8,7 +8,6 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,6 +38,18 @@ public class Main {
         List<File> files = FileUtils.getFiles(dir);
         logger.info("Loaded: " + files);
 
+        // Get the different ipv4
+        List<InetAddress> addrs = new ArrayList<>();
+        for (int i = 1; i < args.length; i++) {
+            try {
+                InetAddress addr = InetAddress.getByName(args[i]);
+                addrs.add(addr);
+            } catch (UnknownHostException e) {
+                logger.log(Level.SEVERE, "Invalid address " + args[i], e);
+            }
+        }
+        if (addrs.size() == 0) return;
+
         // Create socket
         DatagramSocket socket;
         try{
@@ -48,51 +59,13 @@ public class Main {
             return;
         }
 
-        // Get the different ipv4
-
-
-        List<InetAddress> adds = new ArrayList<>();
-        for (int i = 1; i < args.length; i++) {
-            try {
-                InetAddress add = InetAddress.getByName(args[i]);
-                adds.add(add);
-            } catch (UnknownHostException e) {
-                logger.log(Level.SEVERE, "Invalid address " + args[i], e);
-            }
+        List<FFConnection> connections = new ArrayList<>();
+        for(InetAddress addr : addrs){
+            FFConnection connection = new FFConnection(socket, addr);
+            connection.connect();
+            connections.add(connection);
+            logger.info("Connected to " + addr.getHostAddress());
         }
-        if (adds.size() == 0) return;
-//
-//        List<UDPSocket> sockets = new ArrayList<>();
-//        for (InetAddress add : adds){
-//            try {
-//                UDPSocket socket = new UDPSocket(add);
-//                sockets.add(socket);
-//                System.out.println("Socket created: " + socket.socket.toString());
-//            } catch (SocketException e) {
-//                System.out.println("Failed to create socket: " + add.getHostAddress());
-////                e.printStackTrace();
-//            }
-//        }
-//        if(sockets.size() == 0) return;
-//
-//        UDPServer udpServer = new UDPServer(sockets);
-//        udpServer.run();
-//
-//        Scanner scanner = new Scanner(System.in);
-//        String msg = scanner.nextLine();
-//
-//        for(UDPSocket socket : sockets){
-//            try {
-//                socket.sendPacket(msg);
-//            } catch (IOException e) {
-//                System.out.println("Failed to send packet");
-////                e.printStackTrace();
-//            }
-//        }
-//
-//        for(UDPSocket socket : sockets){
-//            socket.close();
-//        }
     }
 
     private static void loadLogger(){

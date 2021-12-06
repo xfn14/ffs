@@ -1,21 +1,34 @@
 import java.io.IOException;
-import java.util.List;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UDPServer implements Runnable {
-    private List<UDPSocket> sockets;
+    private Logger logger = Logger.getLogger("FFSync");
+    private DatagramSocket socket;
+    private InetAddress addr;
+    private boolean running = true;
 
-    public UDPServer(List<UDPSocket> sockets){
-        this.sockets = sockets;
+    public UDPServer(DatagramSocket socket, InetAddress addr){
+        this.socket = socket;
+        this.addr = addr;
     }
 
     @Override
     public void run() {
-        for(UDPSocket socket : this.sockets){
+        byte[] buffer = new byte[2024];
+        DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+        while(this.running){
             try {
-                socket.receivePacket();
+                this.socket.receive(packet);
+                String in = new String(packet.getData());
+                this.logger.log(Level.INFO, "From " + packet.getAddress().getHostAddress() + ": " + in);
             } catch (IOException e) {
-                e.printStackTrace();
+                this.logger.log(Level.SEVERE, "UDP Server failure, socket might be closed (" + this.addr.getHostAddress() + ").", e);
             }
         }
+        socket.close();
     }
 }
