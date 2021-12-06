@@ -4,24 +4,19 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Client implements Runnable{
+    private Logger logger;
+    private DatagramSocket socket;
     private InetAddress addr;
     private boolean run = true;
 
-    public Client(String ip) throws UnknownHostException {
-        this.addr = InetAddress.getByName(ip);
+    public Client(Logger logger, DatagramSocket socket, InetAddress addrDest) {
+        this.logger = logger;
+        this.socket = socket;
+        this.addr = addrDest;
     }
 
     @Override
     public void run() {
-        DatagramSocket socket;
-        try{
-            socket = new DatagramSocket(3004);
-            socket.setBroadcast(true);
-        }catch (SocketException e){
-            e.printStackTrace();
-            return;
-        }
-
         int i = 0;
         while(this.run){
             if(i == 10) this.run = false;
@@ -32,11 +27,10 @@ public class Client implements Runnable{
                     data,
                     data.length,
                     addr,
-                    3004
+                    8888
             );
             try {
                 socket.send(packet);
-                System.out.println(new String(packet.getData()));
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -1,3 +1,8 @@
+log.txt*
+resources/tp2-folder1/*
+resources/tp2-folder2/*
+resources/tp2-folder3/*
+
 ### Eclipse template
 .metadata
 bin/

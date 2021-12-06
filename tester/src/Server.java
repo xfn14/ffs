@@ -1,20 +1,20 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.SocketException;
+import java.util.logging.Level;
 
 public class Server implements Runnable {
+    private Logger logger;
     private boolean run = true;
+    private DatagramSocket socket;
+
+    public Server(Logger logger, DatagramSocket socket){
+        this.logger = logger;
+        this.socket = socket;
+    }
+
     @Override
     public void run() {
-        DatagramSocket socket;
-        try{
-            socket = new DatagramSocket(3004);
-        }catch (SocketException e){
-            e.printStackTrace();
-            return;
-        }
-
         DatagramPacket packet = new DatagramPacket(new byte[1024], 1024);
         String temp;
         while(this.run){
@@ -22,11 +22,12 @@ public class Server implements Runnable {
                 socket.receive(packet);
                 temp = new String(packet.getData());
                 if(temp.equals("quit")) run = false;
-                System.out.println("Received: " + temp);
+                this.logger.log(Level.INFO, "From " + packet.getAddress().getHostAddress() + ": " + temp);
             }catch (IOException e){
                 e.printStackTrace();
                 return;
             }
         }
+        socket.close();
     }
 }
