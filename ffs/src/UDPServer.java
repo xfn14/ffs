@@ -15,7 +15,7 @@ public class UDPServer implements Runnable {
 
     @Override
     public void run() {
-        byte[] buffer = new byte[2024];
+        byte[] buffer = new byte[1024];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
         while(this.running){
             try {
@@ -23,10 +23,11 @@ public class UDPServer implements Runnable {
                 String in = new String(packet.getData());
                 this.logger.log(Level.INFO, "From " + packet.getAddress().getHostAddress() + ": " + in);
             } catch (IOException e) {
-                this.logger.log(Level.SEVERE, "UDP Server failure, socket might be closed.", e);
+                this.logger.log(Level.WARNING, "Server stoped.");
+                this.stop();
+                break;
             }
         }
-        socket.close();
     }
 
     public void stop(){

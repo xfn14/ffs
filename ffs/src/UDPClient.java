@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -24,7 +25,7 @@ public class UDPClient {
     }
 
     public void sendPacket(String msg){
-        byte[] data = msg.getBytes();
+        byte[] data = msg.getBytes(StandardCharsets.US_ASCII);
         this.sendPacket(new DatagramPacket(
                 data, data.length,
                 this.addr, 8888

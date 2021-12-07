@@ -33,11 +33,16 @@ public class ConnectionHandler implements Runnable {
     @Override
     public void run() {
         Scanner scanner = new Scanner(System.in);
-        while(running){
-            String temp = scanner.nextLine();
-            this.broadcastMessage(temp);
+        while(this.running){
+            String in = scanner.nextLine();
+            if(in.equalsIgnoreCase("quit")){
+                this.server.stop();
+                this.stop();
+                continue;
+            }
+            this.broadcastMessage(in);
         }
-        socket.close();
+        this.socket.close();
         scanner.close();
     }
 
