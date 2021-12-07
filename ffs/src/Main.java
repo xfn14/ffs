@@ -8,6 +8,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -59,13 +60,9 @@ public class Main {
             return;
         }
 
-        List<FFConnection> connections = new ArrayList<>();
-        for(InetAddress addr : addrs){
-            FFConnection connection = new FFConnection(socket, addr);
-            connection.connect();
-            connections.add(connection);
-            logger.info("Connected to " + addr.getHostAddress());
-        }
+        ConnectionHandler connectionHandler = new ConnectionHandler(socket, addrs);
+        Thread connectionThread = new Thread(connectionHandler);
+        connectionThread.start();
     }
 
     private static void loadLogger(){
