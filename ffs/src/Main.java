@@ -1,3 +1,4 @@
+import htmlServer.TCPServer;
 import utils.FileUtils;
 
 import java.io.File;
@@ -15,7 +16,7 @@ public class Main {
     public static Logger logger = Logger.getLogger("FFSync");
 
     public static void main(String[] args) {
-        loadLogger();
+        loadLoggerSettings();
 
         if(args.length < 2){
             logger.severe("Invalid arguments");
@@ -57,12 +58,16 @@ public class Main {
             return;
         }
 
-        ConnectionHandler connectionHandler = new ConnectionHandler(socket, addrs);
-        Thread connectionThread = new Thread(connectionHandler);
-        connectionThread.start();
+        TCPServer tcpServer = new TCPServer();
+        Thread tcpThread = new Thread(tcpServer);
+        tcpThread.start();
+
+        FFManager ffManager = new FFManager(socket, addrs);
+        Thread ffManagerThread = new Thread(ffManager);
+        ffManagerThread.start();
     }
 
-    private static void loadLogger(){
+    private static void loadLoggerSettings(){
         try {
             SimpleFormatter formatter = new SimpleFormatter(){
                 @Override
@@ -82,8 +87,8 @@ public class Main {
             ConsoleHandler consoleHandler = new ConsoleHandler();
             consoleHandler.setFormatter(formatter);
             logger.addHandler(fileHandler);
-            logger.setUseParentHandlers(false);
             logger.addHandler(consoleHandler);
+            logger.setUseParentHandlers(false);
         } catch (IOException e) {
             logger.warning("Failed to open log file. Logs won't be registered.");
         }

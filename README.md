@@ -1,3 +1,3 @@
-# FastFileSync
+# FolderFastSync
 
 Dropbox wanna be.

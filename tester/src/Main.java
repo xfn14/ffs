@@ -19,8 +19,8 @@ public class Main {
         Thread client = new Thread(new Client(logger, socket, addrDest));
         client.start();
 
-//        socket.disconnect();
-//        socket.close();
+        socket.disconnect();
+        socket.close();
 
 
 
