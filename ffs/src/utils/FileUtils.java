@@ -1,6 +1,8 @@
 package utils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,5 +20,9 @@ public class FileUtils {
             } else files.add(file);
         }
         return files;
+    }
+
+    public static byte[] fileToBytes(File file) throws IOException {
+        return Files.readAllBytes(file.toPath());
     }
 }

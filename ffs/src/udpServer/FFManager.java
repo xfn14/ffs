@@ -1,8 +1,18 @@
+package udpServer;
+
+import udpServer.packets.FilePacket;
+import utils.NetUtils;
+
+import java.io.IOException;
+import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FFManager implements Runnable {
@@ -12,8 +22,13 @@ public class FFManager implements Runnable {
     private List<UDPClient> clients;
     private boolean running = true;
 
-    public FFManager(DatagramSocket socket, List<InetAddress> addrs){
-        this.socket = socket;
+    public FFManager(List<InetAddress> addrs){
+        try{
+            this.socket = new DatagramSocket(8888);
+        } catch (SocketException e){
+            logger.log(Level.SEVERE, "Failed to bind socket", e);
+            return;
+        }
         this.clients = new ArrayList<>();
         for(InetAddress addr : addrs){
             UDPClient client = new UDPClient(this.socket, addr);
@@ -40,7 +55,17 @@ public class FFManager implements Runnable {
                 this.stop();
                 continue;
             }
-            this.broadcastMessage(in);
+            try {
+                byte[] arr = NetUtils.objectToBytes(new FilePacket("tass bem rei"));
+                DatagramPacket packet = new DatagramPacket(
+                        arr, arr.length,
+                        clients.get(0).getAddr(), 8888
+                );
+                System.out.println(Arrays.toString(packet.getData()));
+                this.clients.get(0).sendPacket(packet);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         this.socket.close();
         scanner.close();

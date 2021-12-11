@@ -1,3 +1,5 @@
+package udpServer;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -30,5 +32,9 @@ public class UDPClient {
                 data, data.length,
                 this.addr, 8888
         ));
+    }
+
+    public InetAddress getAddr() {
+        return this.addr;
     }
 }

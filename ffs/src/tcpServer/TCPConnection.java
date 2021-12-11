@@ -1,4 +1,4 @@
-package htmlServer;
+package tcpServer;
 
 import java.io.*;
 import java.net.Socket;
@@ -25,7 +25,7 @@ public class TCPConnection implements Runnable {
     public void run() {
         while(running){
             try {
-                this.printWriter.println("HTTP/1.1 200 OK");
+                this.printWriter.println("HTTP/1.1 200 OK\r");
                 this.printWriter.println("Content-type: text/html; charset=UTF-8");
                 this.printWriter.println("\r");
                 File file = new File("ffs/resources/index.html");

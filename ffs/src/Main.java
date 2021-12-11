@@ -1,15 +1,13 @@
-import htmlServer.TCPServer;
+import tcpServer.TCPServer;
+import udpServer.FFManager;
+import udpServer.packets.FilePacket;
 import utils.FileUtils;
+import utils.NetUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.net.*;
+import java.util.*;
 import java.util.logging.*;
 
 public class Main {
@@ -24,7 +22,7 @@ public class Main {
         }
 
         // Load folder from 1st argument
-        File dir = new File(args[0]);
+        final File dir = new File(args[0]);
         if(!dir.exists()){
             if(!dir.mkdirs()){
                 logger.severe("Error creating folder.");
@@ -36,6 +34,14 @@ public class Main {
         }
         List<File> files = FileUtils.getFiles(dir);
         logger.info("Loaded: " + files);
+        System.out.println(dir.getPath());
+        try {
+            byte[] arr = NetUtils.objectToBytes(new FilePacket());
+            System.out.println(arr.length);
+            System.out.println(Arrays.toString(arr));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Get the different ipv4
         List<InetAddress> addrs = new ArrayList<>();
@@ -49,22 +55,13 @@ public class Main {
         }
         if (addrs.size() == 0) return;
 
-        // Create socket
-        DatagramSocket socket;
-        try{
-            socket = new DatagramSocket(8888);
-        } catch (SocketException e){
-            logger.log(Level.SEVERE, "Failed to bind socket", e);
-            return;
-        }
-
-        TCPServer tcpServer = new TCPServer();
-        Thread tcpThread = new Thread(tcpServer);
-        tcpThread.start();
-
-        FFManager ffManager = new FFManager(socket, addrs);
+        FFManager ffManager = new FFManager(addrs);
         Thread ffManagerThread = new Thread(ffManager);
         ffManagerThread.start();
+
+        TCPServer tcpServer = new TCPServer(dir);
+        Thread tcpThread = new Thread(tcpServer);
+        tcpThread.start();
     }
 
     private static void loadLoggerSettings(){
