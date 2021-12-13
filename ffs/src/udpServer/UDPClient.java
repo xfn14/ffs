@@ -10,10 +10,12 @@ import java.util.logging.Logger;
 
 public class UDPClient {
     private final Logger logger = Logger.getLogger("FFSync");
+    private final int port;
     private DatagramSocket socket;
     private InetAddress addr;
 
-    public UDPClient(DatagramSocket socket, InetAddress addr){
+    public UDPClient(int port, DatagramSocket socket, InetAddress addr){
+        this.port = port;
         this.socket = socket;
         this.addr = addr;
     }
@@ -30,7 +32,7 @@ public class UDPClient {
         byte[] data = msg.getBytes(StandardCharsets.US_ASCII);
         this.sendPacket(new DatagramPacket(
                 data, data.length,
-                this.addr, 8888
+                this.addr, this.port
         ));
     }
 

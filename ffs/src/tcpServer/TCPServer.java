@@ -4,8 +4,10 @@ import utils.NetUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,12 +15,14 @@ import java.util.logging.Logger;
 public class TCPServer implements Runnable {
     private final Logger logger = Logger.getLogger("FFSync");
     private ServerSocket serverSocket;
+    private List<InetAddress> connections;
     private boolean running = true;
     private final int port = 8889;
     private final File dir;
 
-    public TCPServer(File dir){
+    public TCPServer(File dir, List<InetAddress> connections){
         this.dir = dir;
+        this.connections = connections;
         try {
             this.serverSocket = new ServerSocket(this.port);
             this.logger.info("TCP Server running at: " +
@@ -36,7 +40,7 @@ public class TCPServer implements Runnable {
             try {
                 Socket socket = this.serverSocket.accept();
                 this.logger.info(socket.getInetAddress().getHostName() + " connected to TCP Socket");
-                TCPConnection connection = new TCPConnection(socket);
+                TCPConnection connection = new TCPConnection(socket, this.dir, this.connections);
                 Thread connectionThread = new Thread(connection);
                 connectionThread.start();
             } catch (IOException e) {

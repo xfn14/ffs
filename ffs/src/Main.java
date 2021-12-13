@@ -1,8 +1,6 @@
 import tcpServer.TCPServer;
 import udpServer.FFManager;
-import udpServer.packets.FilePacket;
 import utils.FileUtils;
-import utils.NetUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,14 +32,6 @@ public class Main {
         }
         List<File> files = FileUtils.getFiles(dir);
         logger.info("Loaded: " + files);
-        System.out.println(dir.getPath());
-        try {
-            byte[] arr = NetUtils.objectToBytes(new FilePacket());
-            System.out.println(arr.length);
-            System.out.println(Arrays.toString(arr));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
         // Get the different ipv4
         List<InetAddress> addrs = new ArrayList<>();
@@ -52,14 +42,13 @@ public class Main {
             } catch (UnknownHostException e) {
                 logger.log(Level.SEVERE, "Invalid address " + args[i], e);
             }
-        }
-        if (addrs.size() == 0) return;
+        } if (addrs.size() == 0) return;
 
-        FFManager ffManager = new FFManager(addrs);
+        FFManager ffManager = new FFManager(dir, files, addrs);
         Thread ffManagerThread = new Thread(ffManager);
         ffManagerThread.start();
 
-        TCPServer tcpServer = new TCPServer(dir);
+        TCPServer tcpServer = new TCPServer(dir, addrs);
         Thread tcpThread = new Thread(tcpServer);
         tcpThread.start();
     }

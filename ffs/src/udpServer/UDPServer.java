@@ -1,7 +1,7 @@
 package udpServer;
 
-import udpServer.packets.FilePacket;
-import udpServer.packets.StatusPacket;
+import udpServer.protocol.FilePacket;
+import udpServer.protocol.StatusPacket;
 import utils.NetUtils;
 
 import java.io.IOException;
@@ -33,10 +33,11 @@ public class UDPServer implements Runnable {
                 Object o = NetUtils.bytesToObject(arr);
                 if(o instanceof StatusPacket){
                     StatusPacket statusPacket = (StatusPacket) o;
-                    System.out.println(statusPacket.getFilesInfo());
+                    this.logger.log(Level.INFO, "Received status packet from " + statusPacket.getOrigin().getHostAddress());
+                    this.logger.log(Level.INFO, "Files info: " + statusPacket.getFilesInfo());
                 }else if(o instanceof FilePacket){
                     FilePacket filePacket = (FilePacket) o;
-                    System.out.println(filePacket.getName());
+                    System.out.println(filePacket);
                 }
 //                String in = new String(packet.getData());
 //                this.logger.log(Level.INFO, "From " + packet.getAddress().getHostAddress() + ": " + in);
