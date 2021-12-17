@@ -42,7 +42,7 @@ public class FFManager implements Runnable {
             this.clients.add(client);
             this.logger.info("Connected to " + addr.getHostAddress());
         }
-        this.server = new UDPServer(this.socket, this.clients);
+        this.server = new UDPServer(this.root, this.files, this.socket, this.clients);
     }
 
     public void broadcastMessage(String msg){
@@ -56,31 +56,28 @@ public class FFManager implements Runnable {
         Thread serverThread = new Thread(this.server);
         serverThread.start();
         while(this.running){
-            String in = scanner.nextLine();
-            if(in.equalsIgnoreCase("quit")){
-                this.server.stop();
-                this.stop();
-                continue;
-            }
+//            String in = scanner.nextLine();
+//            if(in.equalsIgnoreCase("quit")){
+//                this.server.stop();
+//                this.stop();
+//                continue;
+//            }
             for(UDPClient client : this.clients){
                 try {
-                    byte[] arr = NetUtils.objectToBytes(
-                            new StatusPacket(
-                                    localAddr,
-                                    client.getAddr(),
-                                    this.port,
-                                    this.root,
-                                    this.files
-                            )
-                    );
+                    byte[] arr = NetUtils.objectToBytes(new StatusPacket(this.root, this.files));
                     client.sendPacket(new DatagramPacket(
                             arr, arr.length,
                             client.getAddr(), this.port
                     ));
                     this.logger.log(Level.INFO, "Status packet sent to " + client.getAddr().getHostName());
                 } catch (IOException e) {
-                    this.logger.log(Level.WARNING, "Failed to convert status packet to bytes");
+                    this.logger.log(Level.WARNING, "Failed to convert status packet to bytes", e);
                 }
+            }
+            try {
+                Thread.sleep(300);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
         this.socket.close();

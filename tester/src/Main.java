@@ -1,11 +1,31 @@
+import java.io.File;
 import java.net.*;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Main {
     public static void main(String[] args) throws SocketException {
-        Logger logger = new Logger();
+        Logger logger = Logger.getLogger("Test");
+        final File dir = new File("tester/src/");
+        if(!dir.exists()){
+            System.out.println("error");
+//            if(!dir.mkdirs()){
+//                logger.severe("Error creating folder.");
+//                return;
+//            }
+        }else if(dir.isFile()){
+            logger.severe( "Provided path is for a file.");
+            return;
+        }
+        List<File> files = FileUtils.getFiles(dir);
+        logger.info("Loaded: " + files);
+
+        for(File file : files){
+            System.out.println(file.getPath());
+        }
 //        InetAddress addrDest = null;
 //        DatagramSocket socket = new DatagramSocket(8888);
 //        try {
@@ -40,18 +60,18 @@ public class Main {
 //        }
 //        server.start();
 //        client.start();
-        InetAddress inetA_aux = null;
-        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-        for(NetworkInterface netint : Collections.list(nets)) {
-            if (!netint.isLoopback() || !netint.isUp()) {
-                Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-                for(InetAddress inetA : Collections.list(inetAddresses))
-                    if (inetA instanceof Inet4Address)
-                        inetA_aux = inetA;
-            }
-        }
-
-        final InetAddress inetAddress = inetA_aux;
-        System.out.println(inetAddress);
+//        InetAddress inetA_aux = null;
+//        Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+//        for(NetworkInterface netint : Collections.list(nets)) {
+//            if (!netint.isLoopback() || !netint.isUp()) {
+//                Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+//                for(InetAddress inetA : Collections.list(inetAddresses))
+//                    if (inetA instanceof Inet4Address)
+//                        inetA_aux = inetA;
+//            }
+//        }
+//
+//        final InetAddress inetAddress = inetA_aux;
+//        System.out.println(inetAddress);
     }
 }

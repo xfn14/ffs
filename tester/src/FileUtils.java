@@ -1,12 +1,7 @@
-package utils;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class FileUtils {
@@ -27,10 +22,5 @@ public class FileUtils {
 
     public static byte[] fileToBytes(File file) throws IOException {
         return Files.readAllBytes(file.toPath());
-    }
-
-    public static Date getFileDate(File file) throws IOException {
-        FileTime time = Files.readAttributes(file.toPath(), BasicFileAttributes.class).lastModifiedTime();
-        return new Date(time.toMillis());
     }
 }

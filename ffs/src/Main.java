@@ -20,7 +20,8 @@ public class Main {
         }
 
         // Load folder from 1st argument
-        final File dir = new File(args[0]);
+        String path = args[0].charAt(args[0].length()-1) == '/' ? args[0] : args[0] + "/";
+        final File dir = new File(path);
         if(!dir.exists()){
             if(!dir.mkdirs()){
                 logger.severe("Error creating folder.");

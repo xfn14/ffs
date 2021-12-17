@@ -1,5 +1,6 @@
 package udpServer;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -18,6 +19,13 @@ public class UDPClient {
         this.port = port;
         this.socket = socket;
         this.addr = addr;
+    }
+
+    public void sendBytes(byte[] arr){
+        this.sendPacket(new DatagramPacket(
+                arr, arr.length,
+                this.addr, this.port
+        ));
     }
 
     public void sendPacket(DatagramPacket packet){
