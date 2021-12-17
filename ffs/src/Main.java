@@ -5,6 +5,7 @@ import utils.FileUtils;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.*;
 
@@ -56,11 +57,12 @@ public class Main {
 
     private static void loadLoggerSettings(){
         try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");
             SimpleFormatter formatter = new SimpleFormatter(){
                 @Override
                 public String format(LogRecord record) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(new Date(record.getMillis())).append(" ");
+                    sb.append(dateFormat.format(new Date(record.getMillis()))).append(" ");
                     sb.append('[').append(record.getLoggerName()).append("] - ");
                     sb.append(record.getLevel().getLocalizedName()).append(" - ");
                     sb.append(record.getMessage()).append('\n');
@@ -77,7 +79,7 @@ public class Main {
             logger.addHandler(consoleHandler);
             logger.setUseParentHandlers(false);
         } catch (IOException e) {
-            logger.warning("Failed to open log file. Logs won't be registered.");
+            logger.warning("Failed to open log file. Logs won't be saved.");
         }
     }
 }

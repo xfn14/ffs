@@ -9,23 +9,24 @@ import java.util.logging.Logger;
 public class Main {
     public static void main(String[] args) throws SocketException {
         Logger logger = Logger.getLogger("Test");
-        final File dir = new File("tester/src/");
-        if(!dir.exists()){
-            System.out.println("error");
-//            if(!dir.mkdirs()){
-//                logger.severe("Error creating folder.");
-//                return;
-//            }
-        }else if(dir.isFile()){
-            logger.severe( "Provided path is for a file.");
-            return;
-        }
-        List<File> files = FileUtils.getFiles(dir);
-        logger.info("Loaded: " + files);
-
-        for(File file : files){
-            System.out.println(file.getPath());
-        }
+        System.out.println(20/10);
+//        final File dir = new File("tester/src/");
+//        if(!dir.exists()){
+//            System.out.println("error");
+////            if(!dir.mkdirs()){
+////                logger.severe("Error creating folder.");
+////                return;
+////            }
+//        }else if(dir.isFile()){
+//            logger.severe( "Provided path is for a file.");
+//            return;
+//        }
+//        List<File> files = FileUtils.getFiles(dir);
+//        logger.info("Loaded: " + files);
+//
+//        for(File file : files){
+//            System.out.println(file.getPath());
+//        }
 //        InetAddress addrDest = null;
 //        DatagramSocket socket = new DatagramSocket(8888);
 //        try {

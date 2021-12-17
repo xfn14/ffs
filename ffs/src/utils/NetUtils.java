@@ -11,20 +11,20 @@ import java.util.Enumeration;
 public class NetUtils {
     public static InetAddress getLocalAddress() throws SocketException {
         Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
-        for(NetworkInterface netint : Collections.list(nets)) {
-            if (!netint.isLoopback() || !netint.isUp()) {
-                Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
-                for(InetAddress inetA : Collections.list(inetAddresses))
-                    if (inetA instanceof Inet4Address)
-                        return inetA;
+        for(NetworkInterface net : Collections.list(nets)) {
+            if (!net.isLoopback() || !net.isUp()) {
+                Enumeration<InetAddress> addrs = net.getInetAddresses();
+                for(InetAddress addr : Collections.list(addrs))
+                    if (addr instanceof Inet4Address)
+                        return addr;
             }
         } return null;
     }
 
-    public static byte[] objectToBytes(Object packet) throws IOException {
+    public static byte[] objectToBytes(Object o) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutputStream oos = new ObjectOutputStream(bos);
-        oos.writeObject(packet);
+        oos.writeObject(o);
         try{
             return bos.toByteArray();
         } finally {

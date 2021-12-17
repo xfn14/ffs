@@ -1,17 +1,17 @@
 package udpServer.protocol;
 
 import java.io.Serializable;
-import java.nio.file.attribute.FileTime;
 import java.util.Arrays;
+import java.util.Date;
 
 public class FilePacket extends FTRPacket implements Serializable {
     private final String path;
-    private final FileTime lastModified;
+    private final Date lastModified;
     private final int id;
     private final int len;
     private final byte[] data;
 
-    public FilePacket(String path, FileTime lastModified, int id, int len, byte[] data){
+    public FilePacket(String path, Date lastModified, int id, int len, byte[] data){
         super();
         this.path = path;
         this.lastModified = lastModified;
@@ -24,7 +24,7 @@ public class FilePacket extends FTRPacket implements Serializable {
         return this.path;
     }
 
-    public FileTime getLastModified() {
+    public Date getLastModified() {
         return lastModified;
     }
 
@@ -43,11 +43,11 @@ public class FilePacket extends FTRPacket implements Serializable {
     @Override
     public String toString() {
         return "FilePacket{" +
-                "path='" + path + '\'' +
-                ", lastModified=" + lastModified +
-                ", id=" + id +
-                ", len=" + len +
-                ", data=" + Arrays.toString(data) +
+                "path='" + this.path + '\'' +
+                ", lastModified=" + this.lastModified +
+                ", id=" + this.id +
+                ", len=" + this.len +
+                ", data=" + Arrays.toString(this.data) +
                 '}';
     }
 }
