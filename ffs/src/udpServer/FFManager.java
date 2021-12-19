@@ -1,6 +1,7 @@
 package udpServer;
 
 import udpServer.protocol.StatusPacket;
+import utils.FileUtils;
 import utils.NetUtils;
 
 import java.io.File;
@@ -18,7 +19,7 @@ import java.util.logging.Logger;
 public class FFManager implements Runnable {
     private final Logger logger = Logger.getLogger("FFSync");
     private final File root;
-    private final List<File> files;
+    private List<File> files;
     private DatagramSocket socket;
     private UDPServer server;
     private List<UDPClient> clients;
@@ -57,8 +58,9 @@ public class FFManager implements Runnable {
         ZonedDateTime lastRun = null;
         while(this.running){
             ZonedDateTime now = ZonedDateTime.now();
-            if(lastRun == null || now.isAfter(lastRun.plusSeconds(5)) && !this.server.isReceivingFiles()){
+            if(lastRun == null || now.isAfter(lastRun.plusSeconds(2)) && !this.server.isReceivingFiles()){
                 lastRun = now;
+                this.files = FileUtils.getFiles(this.root);
                 for(UDPClient client : this.clients){
                     try {
                         byte[] arr = NetUtils.objectToBytes(new StatusPacket(this.root, this.files));

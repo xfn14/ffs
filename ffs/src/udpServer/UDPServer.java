@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class UDPServer implements Runnable {
     private final Logger logger = Logger.getLogger("FFSync");
-    private final int PACKET_MAX_SIZE = 500;
+    private final int PACKET_MAX_SIZE = 2048;
     private final DatagramSocket socket;
     private final File root;
     private List<File> files;
@@ -45,6 +45,7 @@ public class UDPServer implements Runnable {
                 byte[] arr = packet.getData();
                 Object o = NetUtils.bytesToObject(arr);
                 if(o instanceof StatusPacket){
+                    if(!this.fileReader.isEmpty()) continue;
                     StatusPacket statusPacket = (StatusPacket) o;
                     UDPClient client = this.clients.stream().filter(i -> i.getAddr().getHostAddress().equals(packet.getAddress().getHostAddress())).findFirst().orElse(null);
                     if(client == null){
@@ -104,11 +105,8 @@ public class UDPServer implements Runnable {
                             fileReader.writeFile(this.root);
                             this.files = FileUtils.getFiles(this.root);
                             this.logger.info("File " + fileReader.getPath() + " has been written to " + this.root.getPath());
-                        }
-                        this.fileReader.put(fileReader.getPath(), fileReader);
+                        } else this.fileReader.put(fileReader.getPath(), fileReader);
                     }
-
-                    this.logger.log(Level.INFO, filePacket.toString());
                 }
             } catch (IOException | ClassNotFoundException e) {
                 this.logger.log(Level.WARNING, "Error receiving packet.", e);
