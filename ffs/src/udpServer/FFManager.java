@@ -5,10 +5,10 @@ import utils.NetUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -19,18 +19,17 @@ public class FFManager implements Runnable {
     private final Logger logger = Logger.getLogger("FFSync");
     private final File root;
     private final List<File> files;
-    private final int port = 8888;
     private DatagramSocket socket;
     private UDPServer server;
     private List<UDPClient> clients;
     private boolean running = true;
     private InetAddress localAddr = null;
 
-    public FFManager(File root, List<File> files, List<InetAddress> addrs) {
+    public FFManager(int port, File root, List<File> files, List<InetAddress> addrs) {
         this.root = root;
         this.files = files;
         try{
-            this.socket = new DatagramSocket(this.port);
+            this.socket = new DatagramSocket(port);
             this.localAddr = NetUtils.getLocalAddress();
         } catch (SocketException e){
             logger.log(Level.SEVERE, "Failed to bind socket", e);
@@ -38,7 +37,7 @@ public class FFManager implements Runnable {
         }
         this.clients = new ArrayList<>();
         for(InetAddress addr : addrs){
-            UDPClient client = new UDPClient(this.port, this.socket, addr);
+            UDPClient client = new UDPClient(port, this.socket, addr);
             this.clients.add(client);
             this.logger.info("Connected to " + addr.getHostAddress());
         }
@@ -55,20 +54,20 @@ public class FFManager implements Runnable {
         Scanner scanner = new Scanner(System.in);
         Thread serverThread = new Thread(this.server);
         serverThread.start();
+        ZonedDateTime lastRun = null;
         while(this.running){
-            for(UDPClient client : this.clients){
-                try {
-                    byte[] arr = NetUtils.objectToBytes(new StatusPacket(this.root, this.files));
-                    client.sendBytes(arr);
-                    this.logger.log(Level.INFO, "Status packet sent to " + client.getAddr().getHostName());
-                } catch (IOException e) {
-                    this.logger.log(Level.WARNING, "Failed to convert status packet to bytes", e);
+            ZonedDateTime now = ZonedDateTime.now();
+            if(lastRun == null || now.isAfter(lastRun.plusSeconds(5)) && !this.server.isReceivingFiles()){
+                lastRun = now;
+                for(UDPClient client : this.clients){
+                    try {
+                        byte[] arr = NetUtils.objectToBytes(new StatusPacket(this.root, this.files));
+                        client.sendBytes(arr);
+                        this.logger.log(Level.INFO, "Status packet sent to " + client.getAddr().getHostName());
+                    } catch (IOException e) {
+                        this.logger.log(Level.WARNING, "Failed to convert status packet to bytes", e);
+                    }
                 }
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
         this.socket.close();

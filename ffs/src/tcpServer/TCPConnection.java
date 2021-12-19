@@ -37,13 +37,15 @@ public class TCPConnection implements Runnable {
             File file = new File("../resources/index.html");
             InputStream in = new FileInputStream(file);
             String files = FileUtils.getFiles(dir).stream().map(File::getPath).collect(Collectors.toList()).toString();
-            String s = new BufferedReader(new InputStreamReader(in)) // TODO close streams
-                    .lines()
+            InputStreamReader isr = new InputStreamReader(in);
+            BufferedReader br = new BufferedReader(isr);
+            String s = br.lines()
                     .collect(Collectors.joining("\n"))
                     .replace("%files%", files)
                     .replace("%connections%", connections.toString());
             this.printWriter.write(s);
             this.printWriter.flush();
+            br.close(); isr.close();
             this.printWriter.close();
             this.socket.close();
         } catch (IOException e) {

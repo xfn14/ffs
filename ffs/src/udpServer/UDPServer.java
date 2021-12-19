@@ -1,6 +1,7 @@
 package udpServer;
 
 import udpServer.protocol.FilePacket;
+import udpServer.protocol.FileReader;
 import udpServer.protocol.StatusPacket;
 import utils.FileInfo;
 import utils.FileUtils;
@@ -10,8 +11,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.util.Date;
-import java.util.List;
+import java.time.ZonedDateTime;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -24,7 +25,7 @@ public class UDPServer implements Runnable {
     private final List<File> files;
     private final List<UDPClient> clients;
     private boolean running = true;
-    private boolean working = false;
+    private final Map<String, FileReader> fileReader = new HashMap<>();
 
     public UDPServer(File root, List<File> files, DatagramSocket socket, List<UDPClient> clients){
         this.root = root;
@@ -35,13 +36,13 @@ public class UDPServer implements Runnable {
 
     @Override
     public void run() {
+        this.timeoutFileReader();
         byte[] buffer = new byte[this.PACKET_MAX_SIZE + 4000];
         DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
         while(this.running){
             try {
                 this.socket.receive(packet);
                 byte[] arr = packet.getData();
-                this.working = true;
                 Object o = NetUtils.bytesToObject(arr);
                 if(o instanceof StatusPacket){
                     StatusPacket statusPacket = (StatusPacket) o;
@@ -77,47 +78,82 @@ public class UDPServer implements Runnable {
                             }
                         }
                     }
-                }else if(o instanceof FilePacket){
+                } else if(o instanceof FilePacket) {
                     FilePacket filePacket = (FilePacket) o;
+                    this.logger.info("Received file packet " + filePacket.getId() + "/" + filePacket.getLen() + " for " + filePacket.getPath());
+                    FileReader fileReader;
+                    if(this.fileReader.containsKey(filePacket.getPath())){
+                        fileReader = this.fileReader.get(filePacket.getPath());
+                        fileReader.addFilePacket(filePacket);
+                        if(fileReader.isComplete()){
+                            fileReader.writeFile(this.root);
+                            this.logger.info("File " + fileReader.getPath() + " has been written to " + this.root.getPath());
+                            this.fileReader.remove(filePacket.getPath());
+                        }else this.fileReader.put(fileReader.getPath(), fileReader);
+                    }else{
+                        fileReader = new FileReader(filePacket.getPath(), filePacket.getLen(), this.PACKET_MAX_SIZE, filePacket.getLastModified());
+                        fileReader.addFilePacket(filePacket);
+                        if(fileReader.isComplete()){
+                            fileReader.writeFile(this.root);
+                            this.logger.info("File " + fileReader.getPath() + " has been written to " + this.root.getPath());
+                        }
+                        this.fileReader.put(fileReader.getPath(), fileReader);
+                    }
+
                     this.logger.log(Level.INFO, filePacket.toString());
                 }
             } catch (IOException | ClassNotFoundException e) {
                 this.logger.log(Level.WARNING, "Error receiving packet.", e);
             }
-            this.working = false;
         }
     }
 
-    public void sendFileToClient(File file, UDPClient client){
-        this.working = true;
-        try {
-            byte[] fileArr = FileUtils.fileToBytes(file);
-            String path = file.getPath().substring(root.getPath().length() + 1);
-            Date lastModified = FileUtils.getFileDate(file);
-            int needed = (int) Math.ceil((double) fileArr.length / this.PACKET_MAX_SIZE);
-            for (int i = 0; i < needed; i++) {
-                byte[] data = new byte[this.PACKET_MAX_SIZE];
-                int startPos = i * this.PACKET_MAX_SIZE;
-                System.arraycopy(fileArr, startPos, data, 0,
-                        Math.min(fileArr.length - startPos, this.PACKET_MAX_SIZE));
-                FilePacket filePacket = new FilePacket(path, lastModified, i, needed, data);
-                byte[] filePacketArr = NetUtils.objectToBytes(filePacket);
-                client.sendBytes(filePacketArr);
-                this.logger.log(Level.INFO, "Sent " + filePacket + " to " + client.getAddr().getHostAddress());
+    public void timeoutFileReader(){
+        new Thread(() -> {
+            while(this.running){
+                if(!this.fileReader.isEmpty()){
+                    ZonedDateTime now = ZonedDateTime.now();
+                    List<String> toRemove = new ArrayList<>();
+                    for(FileReader fileReader : this.fileReader.values()){
+                        if(now.isAfter(fileReader.getLastReceived().plusMinutes(2))){
+                            this.logger.warning("File " + fileReader.getPath() + " is no longer on read list");
+                            toRemove.add(fileReader.getPath());
+                        }
+                    }
+                    toRemove.forEach(this.fileReader::remove);
+                }
             }
-        } catch (IOException e) {
-            this.logger.warning("Failed to convert " + file.getPath() + " to byte array.");
-        } finally {
-            this.working = false;
-        }
+        }).start();
+    }
+
+    public void sendFileToClient(File file, UDPClient client){
+        new Thread(() -> {
+            try {
+                byte[] fileArr = FileUtils.fileToBytes(file);
+                String path = file.getPath().substring(root.getPath().length() + 1);
+                Date lastModified = FileUtils.getFileDate(file);
+                int needed = (int) Math.ceil((double) fileArr.length / PACKET_MAX_SIZE);
+                for (int i = 0; i < needed; i++) {
+                    byte[] data = new byte[PACKET_MAX_SIZE];
+                    int startPos = i * PACKET_MAX_SIZE;
+                    System.arraycopy(fileArr, startPos, data, 0,
+                            Math.min(fileArr.length - startPos, PACKET_MAX_SIZE));
+                    FilePacket filePacket = new FilePacket(path, lastModified, i, needed, data);
+                    byte[] filePacketArr = NetUtils.objectToBytes(filePacket);
+                    client.sendBytes(filePacketArr);
+                    logger.log(Level.INFO, "Sent " + filePacket + " to " + client.getAddr().getHostAddress());
+                }
+            } catch (IOException e) {
+                logger.warning("Failed to convert " + file.getPath() + " to byte array.");
+            }
+        }).start();
     }
 
     public void stop(){
         this.running = false;
-        this.working = false;
     }
 
-    public boolean isWorking() {
-        return this.working;
+    public boolean isReceivingFiles() {
+        return !this.fileReader.isEmpty();
     }
 }

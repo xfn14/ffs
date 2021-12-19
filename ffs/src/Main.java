@@ -46,7 +46,7 @@ public class Main {
             }
         } if (addrs.size() == 0) return;
 
-        FFManager ffManager = new FFManager(dir, files, addrs);
+        FFManager ffManager = new FFManager(8888, dir, files, addrs);
         Thread ffManagerThread = new Thread(ffManager);
         ffManagerThread.start();
 
