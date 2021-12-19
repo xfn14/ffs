@@ -19,10 +19,10 @@ import java.util.stream.Collectors;
 
 public class UDPServer implements Runnable {
     private final Logger logger = Logger.getLogger("FFSync");
-    private final int PACKET_MAX_SIZE = 200;
+    private final int PACKET_MAX_SIZE = 500;
     private final DatagramSocket socket;
     private final File root;
-    private final List<File> files;
+    private List<File> files;
     private final List<UDPClient> clients;
     private boolean running = true;
     private final Map<String, FileReader> fileReader = new HashMap<>();
@@ -87,14 +87,22 @@ public class UDPServer implements Runnable {
                         fileReader.addFilePacket(filePacket);
                         if(fileReader.isComplete()){
                             fileReader.writeFile(this.root);
+                            this.files = FileUtils.getFiles(this.root);
                             this.logger.info("File " + fileReader.getPath() + " has been written to " + this.root.getPath());
                             this.fileReader.remove(filePacket.getPath());
                         }else this.fileReader.put(fileReader.getPath(), fileReader);
                     }else{
-                        fileReader = new FileReader(filePacket.getPath(), filePacket.getLen(), this.PACKET_MAX_SIZE, filePacket.getLastModified());
+                        fileReader = new FileReader(
+                                filePacket.getPath(),
+                                filePacket.getLen(),
+                                this.PACKET_MAX_SIZE,
+                                filePacket.getLastModified(),
+                                filePacket.getLastByte()
+                        );
                         fileReader.addFilePacket(filePacket);
                         if(fileReader.isComplete()){
                             fileReader.writeFile(this.root);
+                            this.files = FileUtils.getFiles(this.root);
                             this.logger.info("File " + fileReader.getPath() + " has been written to " + this.root.getPath());
                         }
                         this.fileReader.put(fileReader.getPath(), fileReader);
@@ -115,10 +123,12 @@ public class UDPServer implements Runnable {
                     ZonedDateTime now = ZonedDateTime.now();
                     List<String> toRemove = new ArrayList<>();
                     for(FileReader fileReader : this.fileReader.values()){
-                        if(now.isAfter(fileReader.getLastReceived().plusMinutes(2))){
+                        // Timeout at 5 minutes
+                        if(now.isAfter(fileReader.getLastReceived().plusMinutes(5))){
                             this.logger.warning("File " + fileReader.getPath() + " is no longer on read list");
                             toRemove.add(fileReader.getPath());
                         }
+                        // TODO At 2 minutes ask for missing files
                     }
                     toRemove.forEach(this.fileReader::remove);
                 }
@@ -138,7 +148,7 @@ public class UDPServer implements Runnable {
                     int startPos = i * PACKET_MAX_SIZE;
                     System.arraycopy(fileArr, startPos, data, 0,
                             Math.min(fileArr.length - startPos, PACKET_MAX_SIZE));
-                    FilePacket filePacket = new FilePacket(path, lastModified, i, needed, data);
+                    FilePacket filePacket = new FilePacket(path, lastModified, i, needed, data, fileArr.length - (needed-1)*this.PACKET_MAX_SIZE);
                     byte[] filePacketArr = NetUtils.objectToBytes(filePacket);
                     client.sendBytes(filePacketArr);
                     logger.log(Level.INFO, "Sent " + filePacket + " to " + client.getAddr().getHostAddress());
@@ -147,6 +157,10 @@ public class UDPServer implements Runnable {
                 logger.warning("Failed to convert " + file.getPath() + " to byte array.");
             }
         }).start();
+    }
+
+    public List<File> getFiles() {
+        return this.files;
     }
 
     public void stop(){

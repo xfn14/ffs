@@ -10,14 +10,16 @@ public class FilePacket extends FTRPacket implements Serializable {
     private final int id;
     private final int len;
     private final byte[] data;
+    private final int lastByte;
 
-    public FilePacket(String path, Date lastModified, int id, int len, byte[] data){
+    public FilePacket(String path, Date lastModified, int id, int len, byte[] data, int lastByte){
         super();
         this.path = path;
         this.lastModified = lastModified;
         this.id = id;
         this.len = len;
         this.data = data;
+        this.lastByte = lastByte;
     }
 
     public String getPath() {
@@ -40,14 +42,19 @@ public class FilePacket extends FTRPacket implements Serializable {
         return this.data;
     }
 
+    public int getLastByte() {
+        return this.lastByte;
+    }
+
     @Override
     public String toString() {
         return "FilePacket{" +
-                "path='" + this.path + '\'' +
-                ", lastModified=" + this.lastModified +
-                ", id=" + this.id +
-                ", len=" + this.len +
-                ", data=" + Arrays.toString(this.data) +
+                "path='" + path + '\'' +
+                ", lastModified=" + lastModified +
+                ", id=" + id +
+                ", len=" + len +
+                ", data=" + Arrays.toString(data) +
+                ", lastByte=" + lastByte +
                 '}';
     }
 }
