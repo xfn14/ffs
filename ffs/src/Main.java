@@ -62,8 +62,8 @@ public class Main {
                 @Override
                 public String format(LogRecord record) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append(dateFormat.format(new Date(record.getMillis()))).append(" ");
                     sb.append('[').append(record.getLoggerName()).append("] - ");
+                    sb.append(dateFormat.format(new Date(record.getMillis()))).append(" - ");
                     sb.append(record.getLevel().getLocalizedName()).append(" - ");
                     sb.append(record.getMessage()).append('\n');
                     if(record.getThrown() != null)

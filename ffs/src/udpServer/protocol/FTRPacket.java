@@ -1,15 +1,17 @@
 package udpServer.protocol;
 
+import utils.SecurityUtils;
+
 import java.io.Serializable;
 
 public class FTRPacket implements Serializable {
-    private final String prefix;
+    private final String hash;
 
-    public FTRPacket(){
-        this.prefix = "FT-Rapid Protocol";
+    public FTRPacket(String prefix){
+        this.hash = SecurityUtils.getStringSHA1(prefix);
     }
 
-    public String getPrefix() {
-        return prefix;
+    public String getHash() {
+        return this.hash;
     }
 }

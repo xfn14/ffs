@@ -63,7 +63,7 @@ public class FFManager implements Runnable {
                 this.files = FileUtils.getFiles(this.root);
                 for(UDPClient client : this.clients){
                     try {
-                        byte[] arr = NetUtils.objectToBytes(new StatusPacket(this.root, this.files));
+                        byte[] arr = NetUtils.objectToBytes(new StatusPacket("FF-Transfer Protocol", this.root, this.files));
                         client.sendBytes(arr);
                         this.logger.log(Level.INFO, "Status packet sent to " + client.getAddr().getHostName());
                     } catch (IOException e) {

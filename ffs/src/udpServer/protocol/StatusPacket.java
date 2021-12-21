@@ -17,8 +17,8 @@ public class StatusPacket extends FTRPacket implements Serializable {
     private final List<FileInfo> filesInfo;
     private transient final File root;
 
-    public StatusPacket(File root, List<File> files){
-        super();
+    public StatusPacket(String prefix, File root, List<File> files){
+        super(prefix);
         this.root = root;
         this.filesInfo = filesToInfo(files);
     }
