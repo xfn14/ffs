@@ -55,6 +55,9 @@ public class Main {
         tcpThread.start();
     }
 
+    /**
+     * Método que carrega as definições do logger e guarda num ficheiro
+     */
     private static void loadLoggerSettings(){
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss dd/MM/yyyy");

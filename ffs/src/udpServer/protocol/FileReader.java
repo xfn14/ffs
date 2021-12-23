@@ -33,6 +33,10 @@ public class FileReader {
         this.data = new byte[(this.packetSize * len) - this.packetSize + this.lastByte];
     }
 
+    /**
+     * Adicionar um file packet (fragmento do ficheiro) que o cliente vai recebendo.
+     * @param packet fragmento do ficheiro
+     */
     public void addFilePacket(FilePacket packet){
         if(packet.getLen() != this.len || this.received[packet.getId()]
         || this.lastModified.getTime() != packet.getLastModified().getTime())return;
@@ -45,6 +49,10 @@ public class FileReader {
         System.arraycopy(packetData, 0, this.data, start, len);
     }
 
+    /**
+     * Escrever no ficheiro.
+     * @param root pasta onde se vai escrever o ficheiro
+     */
     public void writeFile(File root){
         Date endTime = new Date();
         long time = (endTime.getTime() - startTime.getTime());

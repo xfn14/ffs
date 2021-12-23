@@ -21,6 +21,10 @@ public class UDPClient {
         this.addr = addr;
     }
 
+    /**
+     * Método que envia um array de bytes
+     * @param arr array de bytes
+     */
     public void sendBytes(byte[] arr){
         this.sendPacket(new DatagramPacket(
                 arr, arr.length,
@@ -28,6 +32,11 @@ public class UDPClient {
         ));
     }
 
+
+    /**
+     * Método que envia um packet
+     * @param packet packet
+     */
     public void sendPacket(DatagramPacket packet){
         try {
             this.socket.send(packet);
@@ -36,6 +45,10 @@ public class UDPClient {
         }
     }
 
+    /**
+     * Metodo que envia um packet no formato de mensagem
+     * @param msg mensagem a ser enviada
+     */
     public void sendPacket(String msg){
         byte[] data = msg.getBytes(StandardCharsets.US_ASCII);
         this.sendPacket(new DatagramPacket(

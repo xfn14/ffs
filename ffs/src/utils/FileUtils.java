@@ -25,10 +25,22 @@ public class FileUtils {
         return files;
     }
 
+    /**
+     * Metódo que converte um file num array de bytes
+     * @param file file a ser convertido
+     * @return array de bytes
+     * @throws IOException
+     */
     public static byte[] fileToBytes(File file) throws IOException {
         return Files.readAllBytes(file.toPath());
     }
 
+    /**
+     * Método que returna a última data que o ficheiro foi modificado
+     * @param file ficheiro
+     * @return data da última vez que foi modificado
+     * @throws IOException
+     */
     public static Date getFileDate(File file) throws IOException {
         FileTime time = Files.readAttributes(file.toPath(), BasicFileAttributes.class).lastModifiedTime();
         return new Date(time.toMillis());

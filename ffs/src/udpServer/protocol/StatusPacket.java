@@ -22,6 +22,12 @@ public class StatusPacket extends FTRPacket implements Serializable {
         this.filesInfo = filesToInfo(files);
     }
 
+    /**
+     * Método que recebe uma lista de files e transforma numa lista de file infos,
+     * isto é, com o nome do file, tamanho e última vez que foi modificada
+     * @param files lista de files
+     * @return lista de FileInfo
+     */
     private List<FileInfo> filesToInfo(List<File> files) {
         List<FileInfo> filesInfo = new ArrayList<>();
         for(File file : files){

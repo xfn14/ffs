@@ -128,6 +128,9 @@ public class UDPServer implements Runnable {
         }
     }
 
+    /**
+     * Método que calcula o tempo
+     */
     public void timeoutFileReader(){
         new Thread(() -> {
             while(this.running){
@@ -147,6 +150,12 @@ public class UDPServer implements Runnable {
             }
         }).start();
     }
+
+    /**
+     * Método que envia o file a um cliente por UDP
+     * @param file ficheiro a ser enviado
+     * @param client ip do cliente
+     */
 
     public void sendFileToClient(File file, UDPClient client){
         new Thread(() -> {
