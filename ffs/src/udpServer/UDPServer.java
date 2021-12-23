@@ -3,7 +3,7 @@ package udpServer;
 import udpServer.protocol.FilePacket;
 import udpServer.protocol.FileReader;
 import udpServer.protocol.StatusPacket;
-import utils.FileInfo;
+import udpServer.protocol.FileInfo;
 import utils.FileUtils;
 import utils.NetUtils;
 import utils.SecurityUtils;
@@ -12,7 +12,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.logging.Level;
@@ -21,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class UDPServer implements Runnable {
     private final Logger logger = Logger.getLogger("FFSync");
-    private final int PACKET_MAX_SIZE = 2048;
+    private final int PACKET_MAX_SIZE = 10000;
     private final DatagramSocket socket;
     private final File root;
     private List<File> files;
@@ -166,6 +165,11 @@ public class UDPServer implements Runnable {
                     byte[] filePacketArr = NetUtils.objectToBytes(filePacket);
                     client.sendBytes(filePacketArr);
                     logger.log(Level.INFO, "Sent " + filePacket.getId() + "/" + filePacket.getLen() + " of " + filePacket.getPath() + " to " + client.getAddr().getHostAddress());
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             } catch (IOException e) {
                 logger.warning("Failed to convert " + file.getPath() + " to byte array.");

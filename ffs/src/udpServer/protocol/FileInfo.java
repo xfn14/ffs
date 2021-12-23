@@ -1,4 +1,4 @@
-package utils;
+package udpServer.protocol;
 
 import java.io.Serializable;
 import java.util.Date;

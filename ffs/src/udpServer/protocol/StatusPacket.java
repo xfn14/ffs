@@ -1,6 +1,5 @@
 package udpServer.protocol;
 
-import utils.FileInfo;
 import utils.FileUtils;
 
 import java.io.File;

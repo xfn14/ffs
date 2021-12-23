@@ -41,7 +41,7 @@ public class FileReader {
         byte[] packetData = packet.getData();
         this.totalBytesUsed += packetData.length;
         int start = this.packetSize * packet.getId();
-        int len = packet.getId()+1 == this.len ? this.lastByte : packetData.length;
+        int len = packet.getId() + 1 == this.len ? this.lastByte : packetData.length;
         System.arraycopy(packetData, 0, this.data, start, len);
     }
 
